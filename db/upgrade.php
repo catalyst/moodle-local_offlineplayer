@@ -23,10 +23,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 function xmldb_local_offlineplayer_upgrade($oldversion) {
-    global $CFG, $DB, $OUTPUT;
-
-    $dbman = $DB->get_manager();
-
     if ($oldversion < 2015031900) {
 
         set_config('release', '2', 'local_offlineplayer');

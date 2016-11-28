@@ -24,7 +24,8 @@
  * @author     Dan Marsden <dan@danmarsden.com>
  */
 
-// Library of functions used by the offline player sync.
+defined('MOODLE_INTERNAL') || die;
+
 
 function force_flush_buffers() {
     @ob_end_flush();
@@ -34,20 +35,20 @@ function force_flush_buffers() {
 }
 
 // Function used by curl file download.
-function update_offline_progress($downloadexpected, $downloaded, $upload_size, $uploaded) {
+function update_offline_progress($downloadexpected, $downloaded, $uploadsize, $uploaded) {
     global $pbar; // Not a great way to manage this but simplifies code.
-    if($downloadexpected > 0 && !empty($downloaded)) {
+    if ($downloadexpected > 0 && !empty($downloaded)) {
         $pbar->update($downloaded, $downloadexpected, get_string('downloadingcourse', 'local_offlineplayer'));
         force_flush_buffers();
     }
 }
 
 // Function used by curl file upload.
-function update_sync_progress($downloadexpected, $downloaded, $upload_size, $uploaded) {
+function update_sync_progress($downloadexpected, $downloaded, $uploadsize, $uploaded) {
     global $pbar2; // Not a great way to manage this but simplifies code.
-    if($upload_size > 0 && !empty($uploaded)) {
+    if ($uploadsize > 0 && !empty($uploaded)) {
         $a = format_string(get_config('local_offlineplayer', 'mothershipname'));
-        $pbar2->update($uploaded, $upload_size, get_string('uploadingdata', 'local_offlineplayer', $a));
+        $pbar2->update($uploaded, $uploadsize, get_string('uploadingdata', 'local_offlineplayer', $a));
         force_flush_buffers();
     }
 }
@@ -58,7 +59,7 @@ function local_offline_check_hash() {
     $uemail = optional_param('uemail', '', PARAM_TEXT);
     $uhash = optional_param('uhash', '', PARAM_ALPHANUMEXT);
     $usersalt = get_config('local_offlineplayer', 'usersalt');
-    // prevent uid for guest/admin users.
+    // Prevent uid for guest/admin users.
     if ($uid > 2 && md5($uid.rawurldecode($uemail).$usersalt) == $uhash) {
         return true;
     } else {
@@ -73,16 +74,17 @@ function offline_activity_get_course_sizes() {
 
     // Copied from coursesize report from Peter Bulmer.
 
-    // Generate a full list of context sitedata usage stats
+    // Generate a full list of context sitedata usage stats.
     $subsql = 'SELECT f.contextid, sum(f.filesize) as filessize' .
         ' FROM {files} f';
     $wherebackup = ' WHERE component like \'backup\'';
     $groupby = ' GROUP BY f.contextid';
-    $sizesql = 'SELECT cx.id, cx.contextlevel, cx.instanceid, cx.path, cx.depth, size.filessize, backupsize.filessize as backupsize' .
-        ' FROM {context} cx ' .
-        ' INNER JOIN ( ' . $subsql . $groupby . ' ) size on cx.id=size.contextid' .
-        ' LEFT JOIN ( ' . $subsql . $wherebackup . $groupby . ' ) backupsize on cx.id=backupsize.contextid' .
-        ' ORDER by cx.depth ASC, cx.path ASC';
+    $sizesql = 'SELECT cx.id, cx.contextlevel, cx.instanceid, cx.path, cx.depth, size.filessize, '.
+                       'backupsize.filessize as backupsize' .
+                ' FROM {context} cx ' .
+          ' INNER JOIN ( ' . $subsql . $groupby . ' ) size on cx.id=size.contextid' .
+           ' LEFT JOIN ( ' . $subsql . $wherebackup . $groupby . ' ) backupsize on cx.id=backupsize.contextid' .
+            ' ORDER BY cx.depth ASC, cx.path ASC';
     $cxsizes = $DB->get_records_sql($sizesql);
     $coursesizes = array(); // To track a mapping of courseid to filessize
     $coursebackupsizes = array(); // To track a mapping of courseid to backup filessize
@@ -92,7 +94,7 @@ function offline_activity_get_course_sizes() {
         'FROM {course} c ' .
         ' INNER JOIN {context} cx ON cx.instanceid=c.id AND cx.contextlevel = ' . CONTEXT_COURSE;
     $courselookup = $DB->get_records_sql($coursesql);
-    foreach($cxsizes as $cxid => $cxdata) {
+    foreach ($cxsizes as $cxid => $cxdata) {
         $contextlevel = $cxdata->contextlevel;
         $instanceid = $cxdata->instanceid;
         $contextsize = $cxdata->filessize;
@@ -113,18 +115,18 @@ function offline_activity_get_course_sizes() {
             continue;
         }
         // Not a course, user, system, category, see it it's something that should be listed under a course:
-        // Modules & Blocks mostly:
+        // Modules & Blocks mostly.
         $path = explode('/', $cxdata->path);
-        array_shift($path); // get rid of the leading (empty) array item
+        array_shift($path); // Get rid of the leading (empty) array item
         array_pop($path); // Trim the contextid of the current context itself
 
         $success = false; // Course not yet found.
         // Look up through the parent contexts of this item until a course is found:
-        while(count($path)) {
+        while (count($path)) {
             $contextid = array_pop($path);
             if (isset($courselookup[$contextid])) {
-                $success = true; //Course found
-                // record the files for the current context against the course
+                $success = true; // Course found.
+                // Record the files for the current context against the course.
                 $courseid = $courselookup[$contextid]->courseid;
                 if (!empty($coursesizes[$courseid])) {
                     $coursesizes[$courseid] += $contextsize;
@@ -153,7 +155,7 @@ function offlineplayer_checkforsyncdata() {
 
     $hasdatatosync = false;
     $coursestosync = array();
-// Check for SCORMS.
+    // Check for SCORMS.
     $sql = "SELECT s.id as scormid, c.id as courseid, c.fullname as coursename, c.shortname as shortname,
                    s.name as scormname, c.idnumber as idnumber, cm.id as cmid, MAX(t.timemodified) as lasttime
           FROM {scorm} s
@@ -174,13 +176,13 @@ function offlineplayer_checkforsyncdata() {
                 $coursestosync = checkcourseobject($coursestosync, $scorm);
                 $coursestosync[$scorm->courseid]->scorms[$scorm->scormid] = $scorm->scormname;
                 $coursestosync[$scorm->courseid]->cmstoset[$scorm->cmid] = 'scorm_' . $scorm->cmid . '_userinfo';
-				$coursestosync[$scorm->courseid]->idnumber = $scorm->idnumber;
+                $coursestosync[$scorm->courseid]->idnumber = $scorm->idnumber;
             }
         }
     }
     $scorms->close();
 
-    // Check for feedback content
+    // Check for feedback content.
     $sql = "SELECT f.id as feedbackid, c.id as courseid, c.fullname as coursename, c.shortname as shortname,
                    f.name as feedbackname, c.idnumber as idnumber, cm.id as cmid, fc.timemodified as lasttime
           FROM {feedback} f
@@ -199,12 +201,12 @@ function offlineplayer_checkforsyncdata() {
                 $coursestosync = checkcourseobject($coursestosync, $feedback);
                 $coursestosync[$feedback->courseid]->feedbacks[$feedback->feedbackid] = $feedback->feedbackname;
                 $coursestosync[$feedback->courseid]->cmstoset[$feedback->cmid] = 'feedback_' . $feedback->cmid . '_userinfo';
-				$coursestosync[$feedback->courseid]->idnumber = $feedback->idnumber;
+                $coursestosync[$feedback->courseid]->idnumber = $feedback->idnumber;
             }
         }
     }
 
-    // Check for certificates
+    // Check for certificates.
     $sql = "SELECT cf.id as certificateid, c.id as courseid, c.fullname as coursename, c.shortname as shortname,
                    cf.name as certificatename, c.idnumber as idnumber, cm.id as cmid, ci.timecreated as lasttime
           FROM {certificate} cf
@@ -223,13 +225,12 @@ function offlineplayer_checkforsyncdata() {
                 $coursestosync = checkcourseobject($coursestosync, $certificate);
                 $coursestosync[$certificate->courseid]->certificates[$certificate->certificateid] = $certificate->certificatename;
                 $coursestosync[$certificate->courseid]->cmstoset[$certificate->cmid] = 'certificate_' . $certificate->cmid . '_userinfo';
-				$coursestosync[$certificate->courseid]->idnumber = $certificate->idnumber;
+                $coursestosync[$certificate->courseid]->idnumber = $certificate->idnumber;
             }
         }
     }
 
-
-    // TODO: Check for other items that can be syncned.
+    // TODO: Check for other items that can be synced.
     return $coursestosync;
 }
 
@@ -271,7 +272,7 @@ function offline_add_forum_missing_label($forumcm) {
 
     $module = $DB->get_record('modules', array('name' => 'label'), '*', MUST_EXIST);
 
-    //forumcm contains the section->id but to use core functions we need the relative section instead
+    // Forumcm contains the section->id but to use core functions we need the relative section instead.
     $section = $DB->get_record('course_sections', array('course' => $forumcm->course, 'id' => $forumcm->section));
 
     $mothershipname = format_string(get_config('local_offlineplayer', 'mothershipname'));

@@ -54,10 +54,11 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pleasewait', 'local_offlineplayer'));
 
 $pbar = new progress_bar('coursedownload', 500, true);
-$pbar->update(0, 100, get_string('downloadingcourse', 'local_offlineplayer')); // Set progress bar to 0 to begin
+$pbar->update(0, 100, get_string('downloadingcourse', 'local_offlineplayer')); // Set progress bar to 0 to begin.
 
 force_flush_buffers();
-$courselist = download_file_content($offlinecfg->mothership.'/local/offline/getcourses.php?token='.$token.'&release='.$offlinecfg->version);
+$downloadurl = $offlinecfg->mothership.'/local/offline/getcourses.php?token='.$token.'&release='.$offlinecfg->version;
+$courselist = download_file_content($downloadurl);
 $object = json_decode($courselist);
 if (empty($object->courses->$courseid)) {
     redirect($CFG->wwwroot, get_string('coursenotavailable', 'local_offlineplayer'), 2);
@@ -86,27 +87,32 @@ $curlopt = array('filepath' => $tmpfile,
 if (file_exists($tmpfile)) {
     $fromsize = filesize($tmpfile);
     if (!empty($fromsize)) {
-        $curlopt['CURLOPT_RANGE'] =  "$fromsize" . "-";
+        $curlopt['CURLOPT_RANGE'] = "$fromsize" . "-";
     } else {
         @unlink($tmpfile);
     }
 }
 
-set_time_limit(60*30); // set high timelimit for download.
+set_time_limit(60 * 30); // Set high timelimit for download.
 
 $result = $curl->download_one($url, array(), $curlopt);
 if ($result == '1') {
     // Rename file as we have completed the download.
-   rename($tmpfile, $tofile);
+    rename($tmpfile, $tofile);
 } else {
     // This is a failed download - show a message and ask the user to try again.
     $filesize = filesize($tmpfile);
     if (!empty($filesize)) {
-        echo $OUTPUT->notification(get_string('downloadfailedresume', 'local_offlineplayer', display_size($filesize)).' <br/><br/>'. $result);
-        echo '<div id="morecoures"><a href="'. $CFG->wwwroot.'/local/offlineplayer/checkinternet.php?action=remotecourses">'.get_string('downloadmoreactivities', 'local_offlineplayer').'</a></div>';
+        echo $OUTPUT->notification(get_string('downloadfailedresume', 'local_offlineplayer', display_size($filesize)).
+                                   ' <br/><br/>'. $result);
+        echo '<div id="morecoures">
+              <a href="'. $CFG->wwwroot.'/local/offlineplayer/checkinternet.php?action=remotecourses">'.
+              get_string('downloadmoreactivities', 'local_offlineplayer').'</a></div>';
     } else {
         echo $OUTPUT->notification(get_string('downloadfailed', 'local_offlineplayer')).' <br/><br/>'. $result;
-        '<div id="morecoures"><a href="'. $CFG->wwwroot.'/local/offlineplayer/checkinternet.php?action=remotecourses">'.get_string('downloadmoreactivities', 'local_offlineplayer').'</a></div>';
+        '<div id="morecoures">
+         <a href="'. $CFG->wwwroot.'/local/offlineplayer/checkinternet.php?action=remotecourses">'.
+        get_string('downloadmoreactivities', 'local_offlineplayer').'</a></div>';
     }
     $pbar->update_full(0, get_string('downloadingcourse', 'local_offlineplayer'));
     exit;
@@ -122,13 +128,13 @@ if ($result != true) {
 try {
     $bcinfo = backup_general_helper::get_backup_information_from_mbz($tofile);
 } catch (backup_helper_exception $e) {
-    // File is not a valid backup
+    // File is not a valid backup.
     @unlink($tofile);
     redirect($CFG->wwwroot, get_string('coursenotvalid', 'local_offlineplayer'), 4);
     exit;
 }
 echo $OUTPUT->heading(get_string('importingcourse', 'local_offlineplayer'));
-echo $OUTPUT->pix_icon('i/loading', get_string('importingcourse', 'local_offlineplayer'), 'moodle', array('class'=>'loadingicon'));
+echo $OUTPUT->pix_icon('i/loading', get_string('importingcourse', 'local_offlineplayer'), 'moodle', array('class' => 'loadingicon'));
 
 force_flush_buffers();
 
@@ -140,14 +146,14 @@ $course = $DB->get_record('course', array('shortname' => $courseshortname));
 // Get Admin user to use during restore.
 $adminuser = get_admin();
 if (!empty($course)) {
-  // we need to update an existing course.
+    // We need to update an existing course.
     $backupmode = backup::TARGET_EXISTING_DELETING;
 } else {
     $course = new stdClass();
     $course->fullname = $coursefullname;
     $course->shortname = $courseshortname;
-    $course->category = 1; // Miscellaneous
-    $course->enablecompletion = 0; // course completion on
+    $course->category = 1; // Miscellaneous.
+    $course->enablecompletion = 0; // Course completion on.
     $course = create_course($course);
     $backupmode = backup::TARGET_NEW_COURSE;
 }
@@ -175,7 +181,7 @@ if (!$rc->execute_precheck()) {
         if (empty($CFG->keeptempdirectoriesonbackup)) {
             fulldelete($pathname);
         }
-        $renderer = $PAGE->get_renderer('core','backup');
+        $renderer = $PAGE->get_renderer('core', 'backup');
         echo $renderer->precheck_notices($precheckresults);
         die();
     }
@@ -188,9 +194,9 @@ $rc->destroy();
 if (empty($CFG->keeptempdirectoriesonbackup)) {
     fulldelete($pathname);
 }
-@unlink($tofile); // Remove downloaded backup file
+@unlink($tofile); // Remove downloaded backup file.
 
-// Restore process uses shortname used in backup file, reset it to use correct shortname so that it doesn't conflict with multi-users.
+// Restore process uses shortname used in backup file, reset to use shortname so that it doesn't conflict with multi-users.
 $course = $DB->get_record('course', array('id' => $course->id));
 $course->shortname = $courseshortname;
 $course->fullname = $coursefullname;
@@ -199,7 +205,7 @@ $course->idnumber = $courseid;
 $DB->update_record('course', $course);
 
 // Now enrol this user as a student in the course.
-$studentrole = $DB->get_record('role', array('shortname'=>'student'));
+$studentrole = $DB->get_record('role', array('shortname' => 'student'));
 $manual = enrol_get_plugin('manual');
 $maninstance1 = $DB->get_record('enrol', array('courseid' => $course->id, 'enrol' => 'manual'), '*');
 if (empty($maninstance1)) {

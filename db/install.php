@@ -24,6 +24,8 @@
  * @author     Dan Marsden <dan@danmarsden.com>
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 function xmldb_local_offlineplayer_install() {
     $role = get_guest_role();
 

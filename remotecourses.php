@@ -57,7 +57,6 @@ if (empty($object->courses)) {
     foreach ($object->courses as $course) {
         echo $OUTPUT->box_start('generalbox info');
 
-        // .coursebox
         echo html_writer::start_tag('div', array(
             'class' => 'remotecourse',
             'data-courseid' => $course->id,
@@ -65,16 +64,16 @@ if (empty($object->courses)) {
 
         echo html_writer::start_tag('div', array('class' => 'info'));
 
-        // course name
+        // Course name.
         $coursename = format_string($course->fullname, true);
-        $courseshortname = $USER->id.'_'.$course->shortname; // courseshortname is prefixed with userid.
+        $courseshortname = $USER->id.'_'.$course->shortname; // Courseshortname is prefixed with userid.
         echo  html_writer::tag('h4', $coursename, array('class' => 'coursename'));
         // If we display course in collapsed form but the course has summary or course contacts, display the link to the info page.
         $downloadlink = $offlinecfg->mothership.'/local/offline/checklogin.php?token='.$token.'&action=downloadcourse&param='.$course->id.'&release='.$offlinecfg->version;
         if (isset($localcourses[$courseshortname])) {
-            $hlink = html_writer::tag('a', get_string('updatecourse', 'local_offlineplayer'), array('href' => $downloadlink, 'class'=>'downloadlink'));
+            $hlink = html_writer::tag('a', get_string('updatecourse', 'local_offlineplayer'), array('href' => $downloadlink, 'class' => 'downloadlink'));
         } else {
-            $hlink = html_writer::tag('a', get_string('download'), array('href' => $downloadlink, 'class'=>'downloadlink'));
+            $hlink = html_writer::tag('a', get_string('download'), array('href' => $downloadlink, 'class' => 'downloadlink'));
         }
 
         echo html_writer::span($hlink, 'downloadbutton');
@@ -83,9 +82,9 @@ if (empty($object->courses)) {
         if (!empty($course->summary)) {
             echo format_string($course->summary, true);
         }
-        echo html_writer::end_tag('div'); // .moreinfo
-        echo  html_writer::end_tag('div'); // .info
-        echo html_writer::end_tag('div'); // .coursebox
+        echo html_writer::end_tag('div'); // End moreinfo.
+        echo  html_writer::end_tag('div'); // End info.
+        echo html_writer::end_tag('div'); // End coursebox.
         echo $OUTPUT->box_end();
     }
 }

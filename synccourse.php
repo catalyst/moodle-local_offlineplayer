@@ -64,17 +64,17 @@ if ($confirm && !empty($token)) {
     force_flush_buffers();
     // Now send this backup file to the mothership.
     $pbar = new progress_bar('generatingupload', 500, true);
-    $pbar->update(0, 100, get_string('generatingupload', 'local_offlineplayer')); // Set progress bar to 0 to begin
+    $pbar->update(0, 100, get_string('generatingupload', 'local_offlineplayer')); // Set progress bar to 0 to begin.
     $barcount = 0;
-    $barinc = 80/$numcourses;
+    $barinc = 80 / $numcourses;
     $files = array();
-    //cheat and use admin user to generate backup.
+    // Cheat and use admin user to generate backup.
     $adminid = $DB->get_field('user', 'id', array('username' => 'admin'), MUST_EXIST);
     // Trigger the sync process.
     $lastsync = array();
     foreach ($coursestosync as $courseid => $data) {
         $files[$courseid] = array();
-        // $data->idnumber contains the id of the course on the mothership.
+        // Var $data->idnumber contains the id of the course on the mothership.
         $lastsync[$data->idnumber] = local_offlineplayer_getsyncdates($courseid);
         // Now generate a backup for each course listed.
         $bc = new backup_controller(backup::TYPE_1COURSE, $courseid, backup::FORMAT_MOODLE,
@@ -98,7 +98,7 @@ if ($confirm && !empty($token)) {
         $pbar->update($barcount, 100, get_string('generatingupload', 'local_offlineplayer', $mothershipname)); // Set progress bar to 0 to begin
     }
 
-    // Now retrieve all activity xml files and course backup file to package into a single zip to send to mothership
+    // Now retrieve all activity xml files and course backup file to package into a single zip to send to mothership.
     $zipfiles = array();
 
     $supportedactivities = array('scorm', 'feedback', 'certificate');
@@ -109,7 +109,7 @@ if ($confirm && !empty($token)) {
         $zipfiles[$archivepath.'/moodle_backup.xml'] = $f .'/moodle_backup.xml';
 
         foreach ($supportedactivities as $activity) {
-            // now find all activity xml files.
+            // Now find all activity xml files.
             $searchpath = $f.'/activities/'.$activity.'_*/'.$activity.'.xml';
             foreach (glob($searchpath) as $found) {
                 $basepath = str_replace($f.'/activities', '', $found);
@@ -122,7 +122,7 @@ if ($confirm && !empty($token)) {
     $zip = new zip_packer();
     $zip->archive_to_pathname($zipfiles, $tempzip);
 
-    // Now delete all old data used to generate the backup:
+    // Now delete all old data used to generate the backup.
     foreach ($files as $filepath) {
         fulldelete($filepath);
         fulldelete($filepath.'.log');
@@ -131,11 +131,11 @@ if ($confirm && !empty($token)) {
     // Now send this backup file to the mothership.
     $a = format_string(get_config('local_offlineplayer', 'mothershipname'));
     $pbar2 = new progress_bar('courseupload', 500, true);
-    $pbar2->update(0, 100, get_string('uploadingdata', 'local_offlineplayer', $a)); // Set progress bar to 0 to begin
+    $pbar2->update(0, 100, get_string('uploadingdata', 'local_offlineplayer', $a)); // Set progress bar to 0 to begin.
 
     force_flush_buffers();
 
-    set_time_limit(60*30); // set high timelimit for upload.
+    set_time_limit(60 * 30); // Set high timelimit for upload.
     $curl = new curl();
     $url = $offlinecfg->mothership.'/local/offline/sync.php?token='.$token.'&release='.$offlinecfg->version;
     $params = array('lastsync' => serialize($lastsync),
@@ -148,8 +148,8 @@ if ($confirm && !empty($token)) {
     }
     $options = array('CURLOPT_PROGRESSFUNCTION' => 'update_sync_progress',
                      'CURLOPT_NOPROGRESS' => false);
-    $json_response = $curl->post($url, $params, $options);
-    $response = json_decode($json_response);
+    $jsonresponse = $curl->post($url, $params, $options);
+    $response = json_decode($jsonresponse);
     if (!empty($response->errors)) {
         foreach ($response->errors as $eid => $error) {
             echo $OUTPUT->notification("An Error occured during sync: ". $eid .":".$error);
@@ -200,7 +200,8 @@ foreach ($coursestosync as $c) {
     echo "</div>";
 }
 echo "</div>";
-$url = new moodle_url($offlinecfg->mothership.'/local/offline/checklogin.php', array('action' => 'synccourse', 'param' => '1', 'release' => $offlinecfg->version));
+$url = new moodle_url($offlinecfg->mothership.'/local/offline/checklogin.php',
+    array('action' => 'synccourse', 'param' => '1', 'release' => $offlinecfg->version));
 $a = format_string(get_config('local_offlineplayer', 'mothershipname'));
 echo $OUTPUT->heading(get_string('synccourse_desc', 'local_offlineplayer', $a), 3);
 echo $OUTPUT->single_button($url, get_string('sync', 'local_offlineplayer', $a));

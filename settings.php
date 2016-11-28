@@ -29,10 +29,12 @@ if ($hassiteconfig) {
     $ADMIN->add('localplugins', $settings);
 
     $settings->add(new admin_setting_configtext('local_offlineplayer/mothershipname',
-        get_string('mothershipname', 'local_offlineplayer'), get_string('mothershipname_desc', 'local_offlineplayer'), '', PARAM_TEXT));
+        get_string('mothershipname', 'local_offlineplayer'),
+        get_string('mothershipname_desc', 'local_offlineplayer'), '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('local_offlineplayer/mothership',
-        get_string('mothershipurl', 'local_offlineplayer'), get_string('mothershipurl_desc', 'local_offlineplayer'), '', PARAM_TEXT));
+        get_string('mothershipurl', 'local_offlineplayer'),
+        get_string('mothershipurl_desc', 'local_offlineplayer'), '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('local_offlineplayer/usersalt',
         get_string('usersalt', 'local_offlineplayer'), get_string('usersalt_desc', 'local_offlineplayer'), '', PARAM_TEXT));

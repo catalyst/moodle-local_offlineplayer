@@ -64,7 +64,7 @@ if (!empty($uemail) && !empty($token) && local_offline_check_hash()) {
     // Check for existing user.
     $user = $DB->get_record('user', array('idnumber' => $uid));
     if (empty($user)) {
-        // create a new user.
+        // Create a new user.
         $newuser = new stdClass();
         $newuser->idnumber = $uid; // Use the id used on mothership to match this account.
         $newuser->firstname = $fname;
@@ -73,28 +73,28 @@ if (!empty($uemail) && !empty($token) && local_offline_check_hash()) {
         $newuser->username = str_replace('+', '', rawurldecode($uemail));
         $newuser->auth = 'manual';
         $userid = user_create_user($newuser);
-        // now log this user in automatically.
+        // Now log this user in automatically.
         $user = get_complete_user_data('id', $userid);
         complete_user_login($user);
         redirect($CFG->wwwroot);
     } else {
-        // this user exists.
+        // This user exists.
         $user = get_complete_user_data('id', $user->id);
         complete_user_login($user);
         redirect($CFG->wwwroot);
     }
 }
 
-// get current users (exclude guest/admin accounts)
+// Get current users (exclude guest/admin accounts).
 $users = $DB->get_records_select('user', 'id > 2 AND deleted = 0');
 
 if (empty($users)) {
-    // show link to create user via mothership.
+    // Show link to create user via mothership.
     echo $OUTPUT->header();
     $a = new stdClass();
     $a->quickstart = $CFG->wwwroot.'/local/offlineplayer/Quick_start_guide_offline_player.pdf';
     $a->createaccount = $offlinecfg->mothership. '/local/offline/checklogin.php?action=login&release='.$offlinecfg->version;
-    $a->mothershipname =$mothershipname;
+    $a->mothershipname = $mothershipname;
     echo $OUTPUT->box(get_string('nolocaluser', 'local_offlineplayer', $a));
     echo $OUTPUT->footer();
     exit;

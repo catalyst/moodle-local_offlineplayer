@@ -14,7 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-//strings for offlineplayer
+/**
+ * Strings for component 'offlieplayer', language 'en'
+ *
+ * @package   local_offlineplayer
+ * @copyright  2015 onwards Catalyst IT {@link http://www.catalyst-eu.net/}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['pluginname'] = 'Offline Player';
 $string['remotecourses'] = 'Courses available for download';
 $string['downloadcourse'] = 'Download course';
@@ -68,9 +75,3 @@ $string['mothershipurl'] = 'Mothership url';
 $string['mothershipurl_desc'] = 'This is the url to your main site - it should match the $CFG->wwwroot setting from your main site.';
 $string['usersalt'] = 'Offline player salt';
 $string['usersalt_desc'] = 'This is used by the offline player to verify communication - this should be copied from the main site setting.';
-
-
-// Custom Kaya strings that override normal ones;
-$string['downloadfailedresume'] = 'Unfortunately, the download was interrupted. Please check your connection. You can click the link below to resume downloading this course, or to download a different course.';
-$string['sync'] = 'Upload my activity to main {$a} site';
-$string['synccourse_desc'] = 'The sync process will take all activity data in your offline player and store it on the main {$a} site.';

@@ -40,7 +40,7 @@ class local_offlineplayer_curlresume extends curl {
             $url .= http_build_query($params, '', '&');
         }
         if (!empty($options['filepath']) && empty($options['file'])) {
-            // open file
+            // Open file.
             if (!($options['file'] = fopen($options['filepath'], $mode))) {
                 $this->errno = 100;
                 return get_string('cannotwritefile', 'error', $options['filepath']);
@@ -51,10 +51,9 @@ class local_offlineplayer_curlresume extends curl {
         $result = $this->request($url, $options);
         if (isset($filepath)) {
             fclose($options['file']);
-            if ($result !== true) {
-                // Don't remove the file on failure as we try to resume failed downloads.
-                // unlink($filepath);
-            }
+
+            // Normally if $result not true, we would delete the file
+            // but we don't remove the file on failure as we try to resume failed downloads.
         }
         return $result;
     }
